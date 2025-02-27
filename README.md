@@ -1,7 +1,8 @@
 # Tax Document Tracker
 
 A simple, local web application to help you keep track of tax-related documents throughout the year.
-[Download](https://github.com/pacmanninja998/Taxes/main/tree/dist "Download")
+
+[Download](https://github.com/pacmanninja998/Taxes/tree/main/dist "Download")
 ## Core Features
 
 ### Track Documents by Tax Year
