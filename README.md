@@ -2,7 +2,7 @@
 
 A simple, local web application to help you keep track of tax-related documents throughout the year.
 
-[Download](https://github.com/pacmanninja998/Taxes/tree/main/dist "Download")
+[Download](https://github.com/pacmanninja998/Taxes/releases "Download")
 ## Core Features
 
 ### Track Documents by Tax Year
