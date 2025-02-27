@@ -1,9 +1,15 @@
 import os
+from pathlib import Path
+
+# Get user's Documents folder and create our app directory
+USER_DOCS = Path.home() / "Documents" / "Tax Doc Helper"
+if not USER_DOCS.exists():
+    USER_DOCS.mkdir(parents=True)
 
 # Path to the template file
-TEMPLATE_PATH = os.path.join('templates', 'tax_tracker.html')
+TEMPLATE_PATH = USER_DOCS / 'tax_tracker.html'
 
-# HTML template with ASCII symbols instead of Unicode
+# HTML template with updated JavaScript for better window handling
 HTML_TEMPLATE = """<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -219,17 +225,57 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             background-color: #e74c3c;
             color: white;
             padding: 8px 15px;
-            margin-top: 20px;
+            border-radius: 4px;
+            margin-left: 10px;
         }
         
-        .footer {
-            text-align: center;
-            margin-top: 20px;
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .app-title {
+            margin: 0;
+        }
+
+        #shutdownOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            z-index: 1000;
+            display: none;
+        }
+        
+        #shutdownOverlay h2 {
+            color: white;
+            margin-bottom: 20px;
         }
     </style>
 </head>
 <body>
-    <h1>Tax Document Tracker</h1>
+    <!-- Shutdown overlay message -->
+    <div id="shutdownOverlay">
+        <h2>Application Shutting Down</h2>
+        <p>The application has been shut down successfully.</p>
+        <p>You can now close this browser window.</p>
+    </div>
+
+    <div class="app-header">
+        <h1 class="app-title">Tax Document Tracker</h1>
+        <form action="/shutdown" method="post" onsubmit="shutdownServer(); return false;">
+            <button type="submit" class="shutdown-btn">Shutdown Server</button>
+        </form>
+    </div>
     
     <div class="container">
         <div class="tax-year" id="taxYearBanner">
@@ -276,14 +322,44 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             <!-- Documents will be added here dynamically -->
         </div>
     </div>
-    
-    <div class="footer">
-        <form action="/shutdown" method="post" onsubmit="return confirm('Are you sure you want to shut down the server?');">
-            <button type="submit" class="shutdown-btn">Shutdown Server</button>
-        </form>
-    </div>
 
     <script>
+        // Function to handle server shutdown
+        function shutdownServer() {
+            if (confirm('Are you sure you want to shut down the application?')) {
+                // Show the shutdown overlay immediately
+                document.getElementById('shutdownOverlay').style.display = 'flex';
+                
+                // Make the request to shutdown the server
+                fetch('/shutdown', {
+                    method: 'POST',
+                    cache: 'no-cache'
+                })
+                .catch(() => {
+                    // Expected - server has terminated
+                });
+                
+                // Immediately update the UI to show shutdown has occurred
+                const overlay = document.getElementById('shutdownOverlay');
+                overlay.innerHTML = '<h2>Application has been shut down</h2>' +
+                                   '<p>You can now close this browser window.</p>' +
+                                   '<button id="closeWindowBtn" style="padding: 10px 20px; margin-top: 20px; ' + 
+                                   'background-color: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer;">' +
+                                   'Close Window</button>';
+                
+                // Add event listener for the close button
+                document.getElementById('closeWindowBtn').addEventListener('click', function() {
+                    window.close();
+                });
+                
+                // Also try to close the window automatically
+                setTimeout(() => {
+                    window.close();
+                }, 100);
+            }
+            return false;
+        }
+    
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize with current tax year (previous calendar year)
             let currentTaxYear;
@@ -723,3 +799,10 @@ def create_template_if_needed():
             f.write(HTML_TEMPLATE)
         return True
     return False
+
+def force_update_template():
+    """Force update the HTML template file"""
+    print(f"Updating HTML template at {TEMPLATE_PATH}")
+    with open(TEMPLATE_PATH, 'w', encoding='utf-8') as f:
+        f.write(HTML_TEMPLATE)
+    return True

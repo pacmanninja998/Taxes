@@ -1,11 +1,9 @@
 # -*- mode: python ; coding: utf-8 -*-
-
-
 a = Analysis(
     ['Taxes.py'],
     pathex=['.'],
     binaries=[],
-    datas=[('static', 'static'), ('templates', 'templates')],
+    datas=[('static', 'static')],
     hiddenimports=['routes', 'template_manager', 'data_manager'],
     hookspath=[],
     hooksconfig={},
@@ -13,30 +11,30 @@ a = Analysis(
     excludes=[],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
-    cipher=None,
+	cipher=None,
     noarchive=False,
-    optimize=0,
+	optimize=0,
 )
 pyz = PYZ(a.pure)
-
 exe = EXE(
     pyz,
     a.scripts,
     a.binaries,
+    a.zipfiles,
     a.datas,
     [],
-    name='Taxes',
+    name='Tax Doc Helper',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,
-    console=True,
+    console=False,
+    icon='static/icon.png',
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=['static\\Icon.png'],
 )

@@ -1,7 +1,16 @@
 from flask import render_template, request, jsonify, send_from_directory
 import datetime
 import os
+import sys
+import signal
+import subprocess
+import threading
+import time
 from data_manager import get_documents_for_year, save_documents_for_year, load_all_data
+from pathlib import Path
+
+# Get user's Documents folder path
+USER_DOCS = Path.home() / "Documents" / "Tax Doc Helper"
 
 def register_routes(app):
     """Register all application routes"""
@@ -41,9 +50,21 @@ def register_routes(app):
 
     @app.route('/shutdown', methods=['POST'])
     def shutdown():
-        """Shutdown the server"""
-        func = request.environ.get('werkzeug.server.shutdown')
-        if func is None:
-            raise RuntimeError('Not running with the Werkzeug Server')
-        func()
-        return 'Server shutting down...'
+        """Shutdown the server and kill the process with extreme prejudice"""
+        # Return a response immediately
+        response = jsonify({"status": "shutting_down"})
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        
+        def shutdown_server():
+            # Just kill the process directly - as fast as possible
+            import os, sys
+            # Use os._exit() which doesn't do any cleanup but guarantees termination
+            os._exit(0)
+        
+        # Set an extremely short timer 
+        from threading import Timer
+        timer = Timer(0.001, shutdown_server)  # 1 millisecond delay
+        timer.daemon = True
+        timer.start()
+        
+        return response

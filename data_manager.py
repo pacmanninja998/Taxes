@@ -1,8 +1,14 @@
 import json
 import os
+from pathlib import Path
+
+# Get user's Documents folder and create our app directory
+USER_DOCS = Path.home() / "Documents" / "Tax Doc Helper"
+if not USER_DOCS.exists():
+    USER_DOCS.mkdir(parents=True)
 
 # Constants
-DATA_FILE = 'tax_documents_data.json'
+DATA_FILE = USER_DOCS / 'tax_documents_data.json'
 
 def load_all_data():
     """Load all document data from file"""
