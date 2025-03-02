@@ -2,6 +2,7 @@
 import tkinter as tk
 import argparse
 import sys
+import os
 from pathlib import Path
 
 # Import the GUI application
@@ -34,13 +35,22 @@ def main():
     
     # Set application icon if available
     try:
-        # Try to set an icon (on Windows you'd use .ico, on macOS .icns)
+        # Get the directory where the script is located
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        icon_path = os.path.join(script_dir, "icon.ico")
+        
+        # Try to set an icon based on platform
         if sys.platform == "win32":
-            root.iconbitmap("tax_icon.ico")
+            root.iconbitmap(icon_path)
         elif sys.platform == "darwin":  # macOS
-            from tkinter.ttk import Frame
-            img = tk.Image("photo", file="tax_icon.png")
-            root.tk.call('wm', 'iconphoto', root._w, img)
+            icon_img = tk.PhotoImage(file=icon_path.replace(".ico", ".png"))
+            root.iconphoto(True, icon_img)
+        else:  # Linux
+            icon_img = tk.PhotoImage(file=icon_path.replace(".ico", ".png"))
+            root.iconphoto(True, icon_img)
+            
+        if args.debug:
+            print(f"Set application icon from: {icon_path}")
     except Exception as e:
         if args.debug:
             print(f"Could not set application icon: {e}")

@@ -73,6 +73,19 @@ class DocumentEditor:
         date_frame = ttk.Frame(main_frame)
         date_frame.grid(row=row, column=1, sticky=tk.W, pady=5)
         
+        # Date entry enabled checkbox
+        self.use_date_var = tk.BooleanVar(
+            value=bool(self.document.get("expectedDate", ""))
+        )
+        date_check = ttk.Checkbutton(
+            date_frame, 
+            text="Set expected date", 
+            variable=self.use_date_var,
+            command=self.toggle_date_entry
+        )
+        date_check.pack(side=tk.LEFT, padx=(0, 10))
+        
+        # Date entry widget
         self.expected_date = DateEntry(
             date_frame, 
             width=12, 
@@ -86,19 +99,17 @@ class DocumentEditor:
         if self.document.get("expectedDate"):
             try:
                 self.expected_date.set_date(self.document.get("expectedDate"))
+                self.expected_date.pack(side=tk.LEFT)
             except:
                 # Default to today if date format is invalid
                 self.expected_date.set_date(datetime.date.today())
-        
-        self.expected_date.pack(side=tk.LEFT)
-        
-        # Clear date button
-        ttk.Button(
-            date_frame, 
-            text="Clear", 
-            width=8,
-            command=self.clear_expected_date
-        ).pack(side=tk.LEFT, padx=(5, 0))
+                self.expected_date.pack(side=tk.LEFT)
+        else:
+            # No date set
+            self.expected_date.set_date(datetime.date.today())
+            # Don't pack initially if no date
+            if self.use_date_var.get():
+                self.expected_date.pack(side=tk.LEFT)
         
         row += 1
         
@@ -143,6 +154,15 @@ class DocumentEditor:
             command=self.cancel
         ).pack(side=tk.LEFT, padx=5)
     
+    def toggle_date_entry(self):
+        """Toggle date entry widget"""
+        if self.use_date_var.get():
+            # Enable date entry
+            self.expected_date.pack(side=tk.LEFT)
+        else:
+            # Disable date entry
+            self.expected_date.pack_forget()
+    
     def clear_expected_date(self):
         """Clear the expected date field"""
         self.expected_date.set_date("")
@@ -155,10 +175,13 @@ class DocumentEditor:
             self.show_error("Document name cannot be empty")
             return
         
-        # Get date as string (or empty string if cleared)
-        try:
-            date_str = self.expected_date.get_date().isoformat()
-        except:
+        # Get date as string (or empty string if not using)
+        if self.use_date_var.get():
+            try:
+                date_str = self.expected_date.get_date().isoformat()
+            except:
+                date_str = ""
+        else:
             date_str = ""
         
         # Create document data
